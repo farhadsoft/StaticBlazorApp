@@ -1,2 +1,3 @@
 # StaticBlazorApp
-Blazor Web Assambly application in Azure Static Web App
+
+Blazor Web Assembly application in Azure Static Web App
