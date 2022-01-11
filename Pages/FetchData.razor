@@ -1,13 +1,16 @@
 ﻿@page "/fetchdata"
-@inject HttpClient Http
+@using System.Text.Json
+@using StaticBlazorApp.Models
+
+@inject HttpClient httpClient
 
 <PageTitle>Weather forecast</PageTitle>
 
 <h1>Weather forecast</h1>
 
-<p>This component demonstrates fetching data from the server.</p>
+<p>This component demonstrates fetching data from the OpenWeather Api.</p>
 
-@if (forecasts == null)
+@if (weathers?.daily is null)
 {
     <p><em>Loading...</em></p>
 }
@@ -17,19 +20,19 @@ else
         <thead>
             <tr>
                 <th>Date</th>
-                <th>Temp. (C)</th>
-                <th>Temp. (F)</th>
-                <th>Summary</th>
+                <th>Temp. (Day)</th>
+                <th>Humidity</th>
+                <th>Feels Like</th>
             </tr>
         </thead>
         <tbody>
-            @foreach (var forecast in forecasts)
+            @foreach (var weather in weathers.daily)
             {
                 <tr>
-                    <td>@forecast.Date.ToShortDateString()</td>
-                    <td>@forecast.TemperatureC</td>
-                    <td>@forecast.TemperatureF</td>
-                    <td>@forecast.Summary</td>
+                    <td>@UnixTimeToDateTime(weather.dt)</td>
+                    <td>@weather.temp?.day</td>
+                    <td>@weather.humidity</td>
+                    <td>@weather.feels_like?.day</td>
                 </tr>
             }
         </tbody>
@@ -37,21 +40,29 @@ else
 }
 
 @code {
-    private WeatherForecast[]? forecasts;
+    private string? apiUrl;
+    private ResponseWeather? weathers;
 
     protected override async Task OnInitializedAsync()
     {
-        forecasts = await Http.GetFromJsonAsync<WeatherForecast[]>("sample-data/weather.json");
+        apiUrl = @"https://api.openweathermap.org/data/2.5/onecall?lat=50.447731&lon=30.542721&exclude=current,minutely,hourly,alerts&units=metric&appid=20a8059d4ab77345b7568f41e972358a";
+
+        weathers = await GetWeather();
     }
 
-    public class WeatherForecast
+    protected async Task<ResponseWeather?> GetWeather()
     {
-        public DateTime Date { get; set; }
+        var query = apiUrl;
+        var response = await httpClient.GetAsync(query);
+        if (!response.IsSuccessStatusCode)
+            return null;
 
-        public int TemperatureC { get; set; }
+        return await response.Content.ReadFromJsonAsync<ResponseWeather>();
+    }
 
-        public string? Summary { get; set; }
-
-        public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
+    protected DateOnly UnixTimeToDateTime(long unixtime)
+    {
+        var dtDateTime = new DateTime(1970, 1, 1).AddSeconds(unixtime);
+        return DateOnly.FromDateTime(dtDateTime);
     }
 }
