@@ -1,8 +1,11 @@
 ﻿@page "/fetchdata"
 @using System.Text.Json
 @using StaticBlazorApp.Models
+@using BrowserInterop.Extensions
+@using BrowserInterop.Geolocation
 
 @inject HttpClient httpClient
+@inject IJSRuntime jsRuntime
 
 <PageTitle>Weather forecast</PageTitle>
 
@@ -23,16 +26,22 @@ else
                 <th>Temp. (Day)</th>
                 <th>Humidity</th>
                 <th>Feels Like</th>
+                <th>Sun Rise</th>
+                <th>Sun Set</th>
+                <th>Moon Phase</th>
             </tr>
         </thead>
         <tbody>
             @foreach (var weather in weathers.daily)
             {
                 <tr>
-                    <td>@UnixTimeToDateTime(weather.dt)</td>
+                    <td>@UnixTimeToDate(weather.dt).ToString("dd.MM.yyyy")</td>
                     <td>@weather.temp?.day</td>
-                    <td>@weather.humidity</td>
+                    <td>@weather.humidity %</td>
                     <td>@weather.feels_like?.day</td>
+                    <td>@UnixTimeToTime(weather.sunrise + weathers.timezone_offset).ToString("HH:mm")</td>
+                    <td>@UnixTimeToTime(weather.sunset + weathers.timezone_offset).ToString("HH:mm")</td>
+                    <td>@weather.moon_phase</td>
                 </tr>
             }
         </tbody>
@@ -40,19 +49,27 @@ else
 }
 
 @code {
-    private string? apiUrl;
     private ResponseWeather? weathers;
+    private string appid = "20a8059d4ab77345b7568f41e972358a";
+
+    private WindowNavigatorGeolocation? geolocationWrapper;
+    private GeolocationResult? currentPosition;
 
     protected override async Task OnInitializedAsync()
     {
-        apiUrl = @"https://api.openweathermap.org/data/2.5/onecall?lat=50.447731&lon=30.542721&exclude=current,minutely,hourly,alerts&units=metric&appid=20a8059d4ab77345b7568f41e972358a";
-
-        weathers = await GetWeather();
+        var window = await jsRuntime.Window();
+        var navigator = await window.Navigator();
+        geolocationWrapper = navigator.Geolocation;
+        currentPosition = await geolocationWrapper.GetCurrentPosition();
+        if (currentPosition is not null)
+        {
+            weathers = await GetWeather(currentPosition.Location.Coords.Latitude.ToString(), currentPosition.Location.Coords.Longitude.ToString());
+        }
     }
 
-    protected async Task<ResponseWeather?> GetWeather()
+    protected async Task<ResponseWeather?> GetWeather(string lat, string lon)
     {
-        var query = apiUrl;
+        var query = $"https://api.openweathermap.org/data/2.5/onecall?lat={lat}&lon={lon}&exclude=current,minutely,hourly,alerts&units=metric&appid={appid}";
         var response = await httpClient.GetAsync(query);
         if (!response.IsSuccessStatusCode)
             return null;
@@ -60,9 +77,15 @@ else
         return await response.Content.ReadFromJsonAsync<ResponseWeather>();
     }
 
-    protected DateOnly UnixTimeToDateTime(long unixtime)
+    protected DateOnly UnixTimeToDate(long unixtime)
     {
         var dtDateTime = new DateTime(1970, 1, 1).AddSeconds(unixtime);
         return DateOnly.FromDateTime(dtDateTime);
+    }
+
+    protected TimeOnly UnixTimeToTime(long unixtime)
+    {
+        var dtDateTime = new DateTime(1970, 1, 1).AddSeconds(unixtime);
+        return TimeOnly.FromDateTime(dtDateTime);
     }
 }
