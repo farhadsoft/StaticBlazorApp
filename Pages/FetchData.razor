@@ -24,6 +24,7 @@ else
             <tr>
                 <th>Date</th>
                 <th>Temp. (Day)</th>
+                <th>Temp. (Night)</th>
                 <th>Humidity</th>
                 <th>Feels Like</th>
                 <th>Sun Rise</th>
@@ -36,7 +37,8 @@ else
             {
                 <tr>
                     <td>@UnixTimeToDate(weather.dt).ToString("dd.MM.yyyy")</td>
-                    <td>@weather.temp?.day</td>
+                    <td><p class="wi wi-owm-day-@weather.weather[0].id" title="@weather.weather[0].description"></p> @weather.temp?.day</td>
+                    <td><p class="wi wi-owm-night-@weather.weather[0].id" title="@weather.weather[0].description"></p> @weather.temp?.night</td>
                     <td>@weather.humidity %</td>
                     <td>@weather.feels_like?.day</td>
                     <td>@UnixTimeToTime(weather.sunrise + weathers.timezone_offset).ToString("HH:mm")</td>
