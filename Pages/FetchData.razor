@@ -23,10 +23,10 @@ else
         <thead>
             <tr>
                 <th>Date</th>
-                <th>Temp. (Day)</th>
-                <th>Temp. (Night)</th>
-                <th>Humidity</th>
+                <th>Temp. (Max/Min)</th>
                 <th>Feels Like</th>
+                <th>Humidity</th>
+                <th>Wind Speed (m/s)</th>
                 <th>Sun Rise</th>
                 <th>Sun Set</th>
                 <th>Moon Phase</th>
@@ -37,10 +37,10 @@ else
             {
                 <tr>
                     <td>@UnixTimeToDate(weather.dt).ToString("dd.MM.yyyy")</td>
-                    <td><p class="wi wi-owm-day-@weather.weather[0].id" title="@weather.weather[0].description"></p> @weather.temp?.day</td>
-                    <td><p class="wi wi-owm-night-@weather.weather[0].id" title="@weather.weather[0].description"></p> @weather.temp?.night</td>
-                    <td>@weather.humidity %</td>
-                    <td>@weather.feels_like?.day</td>
+                    <td><p class="wi wi-owm-@weather.weather[0].id" title="@weather.weather[0].description"></p> @Math.Truncate(weather.temp.max) / @Math.Truncate(weather.temp.min)</td>
+                    <td>@Math.Truncate(weather.feels_like.day)</td>
+                    <td>@weather.humidity <p class="wi wi-humidity"></p></td>
+                    <td><p class="wi wi-wind towards-@weather.wind_deg-deg"></p> @weather.wind_speed</td>
                     <td>@UnixTimeToTime(weather.sunrise + weathers.timezone_offset).ToString("HH:mm")</td>
                     <td>@UnixTimeToTime(weather.sunset + weathers.timezone_offset).ToString("HH:mm")</td>
                     <td>@weather.moon_phase</td>
