@@ -8,14 +8,14 @@
 <p>
     <RadzenCard>
         <h4 class="mb-4">Default Numeric</h4>
-        <RadzenNumeric TValue="int" Max="1000" Change=@(args => Calculate(args)) Class="w-100" />
+        <RadzenNumeric TValue="int" Max="12" Change=@(args => Calculate(args)) Class="w-100" />
     </RadzenCard>
 
     The result is @f
 </p>
 
 @code {
-    int f = 0;
+    Int32 f = 0;
 
     [DllImport("Native")]
     static extern int fact(int n);
