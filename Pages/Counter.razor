@@ -1,18 +1,27 @@
 ﻿@page "/counter"
+@using System.Runtime.InteropServices
 
-<PageTitle>Counter</PageTitle>
+<PageTitle>Native C</PageTitle>
 
-<h1>Counter</h1>
+<h1>Native C Code</h1>
 
-<p role="status">Current count: @currentCount</p>
+<p>
+    <RadzenCard>
+        <h4 class="mb-4">Default Numeric</h4>
+        <RadzenNumeric TValue="int" Max="1000" Change=@(args => Calculate(args)) Class="w-100" />
+    </RadzenCard>
 
-<button class="btn btn-primary" @onclick="IncrementCount">Click me</button>
+    The result is @f
+</p>
 
 @code {
-    private int currentCount = 0;
+    int f = 0;
 
-    private void IncrementCount()
+    [DllImport("Native")]
+    static extern int fact(int n);
+
+    private void Calculate(int num)
     {
-        currentCount++;
+        f = fact(num);
     }
 }

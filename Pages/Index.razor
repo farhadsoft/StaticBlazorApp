@@ -22,7 +22,7 @@ Welcome to Blazor Web Assembly page and this page hosted by Azure Static Web!
 </div>
 
 @code {
-    Timer timer;
+    Timer? timer;
     double hours;
     double minutes;
     double seconds;
@@ -45,6 +45,6 @@ Welcome to Blazor Web Assembly page and this page hosted by Azure Static Web!
 
     public void Dispose()
     {
-        timer.Dispose();
+        timer?.Dispose();
     }
 }
